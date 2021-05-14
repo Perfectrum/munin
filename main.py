@@ -19,22 +19,28 @@ def init(directory):
         # Если директория существует и пустая, ок
         if glob('{}/*'.format(directory)) == []:
             config['main']['main_directory'] = directory
-            status = 'OK, directory {} is set'.format(directory)
+            status = True
+            message = 'OK, directory {} is set'.format(directory)
         # Если директория существует и не пустая, отказ
         else:
-            status = 'Directory is not empty'
+            status = False
+            message = 'Directory is not empty'
     
     # Если директория не существует, создаем ее и ок
     else:
         os.mkdir(directory)
         config['main']['main_directory'] = directory
-        status = 'OK, directory {} is created and set'.format(directory)
+        status = True
+        message = 'OK, directory {} is created and set'.format(directory)
+
+    if status:
+        pass # Создать БД тут
     
     # Запоминаем изменения в конфиге
     with open('config.ini', 'w') as config_file:
         config.write(config_file)
 
-    return status
+    return message
 
 ##########################################################
 # Функция, добавляющая пользователя в файловую структуру #
@@ -45,6 +51,8 @@ def add_user(username):
     config = configparser.ConfigParser()
     config.read('config.ini')
     main_dir = config['main']['main_directory']
+
+    # добавить пользователя в БД тут
 
     os.mkdir('{}/{}'.format(main_dir, username))
 
