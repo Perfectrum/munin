@@ -241,13 +241,17 @@ def delete_card(username, card_name):
 # Удаление пользователя из БД #
 ###############################
 def delete_user(user_name):
-    main_connection = sqlite3.connect("main.db")
+    
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    main_dir = config['main']['main_directory']
+    
+    main_connection = sqlite3.connect('{}/main.db'.format())
     main_cursor = main_connection.cursor()
     main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(user_name) +"\"")
     if main_cursor.fetchall() == []:
-        print("There is no user with this name")
         main_connection.close()
-        return "There is no user with this name"
+        return 'There is no user with this name'
     else:
         main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
         delid = main_cursor.fetchall()[0][0]
@@ -261,23 +265,28 @@ def delete_user(user_name):
 # Повторение карточек по именам #
 #################################
 def get_card(card_name):
-        ####################
-        # Работа с БД      #
-        ####################
-        # question_path =  #
-        # answer_path =    #
-        ####################
-        curs = sqlite3.connect("main.db").cursor()
-        curs.execute("SELECT question_path, answer_path FROM cards WHERE card_name = \""+
+ 
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    main_dir = config['main']['main_directory']
+    
+    curs = sqlite3.connect('{}/main.db'.format(main_dir)).cursor()
+    curs.execute("SELECT question_path, answer_path FROM cards WHERE card_name = \""+
 		     str(card_name)+"\"")
-        qna =  curs.fetchall()[0]
-        question_path = qna[0]
-        answer_path = qna[1]
-        return question_path, answer_path
+    qna =  curs.fetchall()[0]
+
+    return qna[0], qna[1]
 
 
 ###########################################
 # Запись в БД события повторения карточки #
 ###########################################
 def add_recall(username, card_name, result):
-	pass
+
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    main_dir = config['main']['main_directory']
+    
+    main_connection = sqlite3.connect('{}/main.db'.format(main_dir))
+
+    # Добавить recall в БД
