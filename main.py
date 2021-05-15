@@ -4,6 +4,17 @@ from glob import glob
 import configparser
 import sqlite3
 
+def read_table_from_db(dbfile, tabl):
+    try:
+        curs = sqlite3.connect(dbfile).cursor()
+        curs.execute("SELECT * FROM " + str(tabl))
+        return curs.fetchall()
+    except sqlite3.Error:
+        return "Hueta ebanaya" + str(sqlite3.Error)
+
+print("КАРТ ОЧКИ", read_table_from_db("main.db", "cards"), "\n")
+print("ПИДОРЫ", read_table_from_db("main.db", "users"), "\n")
+
 # Служебная функция для получение id пользователя по его имени (логину)
 def get_user_id(user_name, cursor):
     #main_connection = sqlite3.connect("main.db")
