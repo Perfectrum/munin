@@ -261,14 +261,18 @@ def delete_user(user_name):
 # Повторение карточек по именам #
 #################################
 def get_card(card_name):
-        
         ####################
         # Работа с БД      #
         ####################
         # question_path =  #
         # answer_path =    #
         ####################
-        
+        curs = sqlite3.connect("main.db").cursor()
+        curs.execute("SELECT question_path, answer_path FROM cards WHERE card_name = \""+
+		     str(card_name)+"\"")
+        qna =  curs.fetchall()[0]
+        question_path = qna[0]
+        answer_path = qna[1]
         return question_path, answer_path
 
 
