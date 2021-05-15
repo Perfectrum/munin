@@ -237,7 +237,9 @@ def delete_card(username, card_name):
     
     return status, message
 
-# Удаление пользователя из БД
+###############################
+# Удаление пользователя из БД #
+###############################
 def delete_user(user_name):
     main_connection = sqlite3.connect("main.db")
     main_cursor = main_connection.cursor()
@@ -254,3 +256,17 @@ def delete_user(user_name):
         main_connection.commit()
         main_connection.close()
 
+
+#################################
+# Повторение карточек по именам #
+#################################
+def get_card(card_name):
+        
+        ####################
+        # Работа с БД      #
+        ####################
+        # question_path =  #
+        # answer_path =    #
+        ####################
+        
+        return question_path, answer_path
