@@ -9,6 +9,38 @@ import sqlite3
 # Функция, создающая файловую структуру в заданной директори, #
 #                        запускается при первом использовании #
 ###############################################################
+
+# Удаление пользователя из БД
+def delete_user(user_name):
+    main_connection = sqlite3.connect("main.db")
+    main_cursor = main_connection.cursor()
+    main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(user_name) +"\"")
+    if main_cursor.fetchall() == []:
+        print("There is no user with this name")
+        main_connection.close()
+        return "There is no user with this name"
+    else:
+        main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
+        delid = main_cursor.fetchall()[0][0]
+        main_cursor.execute("DELETE FROM users WHERE user_name = \""+ str(user_name) +"\"")
+        main_cursor.execute("UPDATE users SET user_id = user_id - 1 WHERE user_id > "+str(delid))
+        main_connection.commit()
+        main_connection.close()
+
+# Получение id по имени
+def get_user_id(user_name):
+    main_connection = sqlite3.connect("main.db")
+    main_cursor = main_connection.cursor()
+    main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
+    ids = main_cursor.fetchall()
+    if ids == []:
+        out = "There is no user with this name"
+    else:
+        out = ids[0][0]
+    main_connection.close()
+    return(out)
+
+
 def init(directory):
 
     config = configparser.ConfigParser()
@@ -72,7 +104,25 @@ def add_user(username):
     main_dir = config['main']['main_directory']
 
     # добавить пользователя в БД тут
-    
+    main_connection = sqlite3.connect("main.db")
+    main_cursor = main_connection.cursor()
+    main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(username) + "\"")
+    if main_cursor.fetchall() == []:
+        main_cursor.execute("SELECT user_id FROM users")
+        idmax = main_cursor.fetchall()
+        if idmax == []:
+            cur_id = 1
+        else:
+            cur_id = max(idmax)[0]+1
+        main_cursor.execute("INSERT INTO users (user_id, user_name) VALUES ("+
+                            str(cur_id)+",\""+str(username)+"\")")
+        main_connection.commit()
+        main_connection.close()
+    else:
+        main_connection.close()
+        print("User with this name already exists")
+        return "User with this name already exists"
+
     # Создаем папку с карточками
     os.mkdir('{}/{}'.format(main_dir, username))
 
@@ -143,16 +193,16 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
             main_cursor.execute("SELECT card_id FROM cards")
             idmax = main_cursor.fetchall()
             if idmax == []:
-            	cards_data = [(user_id, 1, card_name, question, answer)]        
+            	cur_id = 1
             else:
-            	cards_data = [(user_id, max(idmax)[0]+1, card_name, question, answer)]        
-            	main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question, answer) VALUES ("+
-                            str(user_id)+","
-		                    +str(max(idmax)[0]+1)+",\""
-				    +str(card_name)+"\",\""
-				    +str(question)+"\",\""
-				    +str(answer)+"\")")
-       	    	main_connection.commit()
+            	cur_id = max(idmax)[0]+1
+            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question, answer) VALUES ("+
+                                str(user_id)+","+
+				str(cur_id)+",\""+
+				str(card_name)+"\",\""+
+				str(question)+"\",\""+
+				str(answer)+"\")")
+            main_connection.commit()
         else:
             status = False
             message+= 'Card {} is already exists'.format(crad_name)	
@@ -182,6 +232,8 @@ def delete_card(username, card_name):
     ######################
     # ОПРЕДЕЛИТЬ user_id #
     ######################
+    user_id = get_user_id(username)
+	
     main_cursor.execute("SELECT * FROM cards WHERE card_name = \""+ str(card_name) +"\" AND user_id = " + str(user_id))
     if main_cursor.fetchall() == []:
         status = False
