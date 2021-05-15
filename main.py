@@ -111,7 +111,7 @@ def add_user(username):
 ##############################################
 # Функция, добавляющая пользователю карточку #
 ##############################################
-def add_card(username, card_name, question_path_path, answer_path, additional_files_paths=[]):
+def add_card(username, card_name, question_path, answer_path, additional_files_paths=[]):
 
     config = configparser.ConfigParser()
     config.read('config.ini')
@@ -128,7 +128,7 @@ def add_card(username, card_name, question_path_path, answer_path, additional_fi
 
         # Если какой-то из путей не валидный, отказ
         files_paths = additional_files_paths
-        files_paths.append(question_path_path)
+        files_paths.append(question_path)
         files_paths.append(answer_path)
 
     # Подключаемся к БД
@@ -253,4 +253,3 @@ def delete_user(user_name):
         main_cursor.execute("UPDATE users SET user_id = user_id - 1 WHERE user_id > "+str(delid))
         main_connection.commit()
         main_connection.close()
-
