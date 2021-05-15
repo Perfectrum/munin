@@ -270,3 +270,10 @@ def get_card(card_name):
         ####################
         
         return question_path, answer_path
+
+
+###########################################
+# Запись в БД события повторения карточки #
+###########################################
+def add_recall(username, card_name, result):
+	pass
