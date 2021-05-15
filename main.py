@@ -288,5 +288,30 @@ def add_recall(username, card_name, result):
     main_dir = config['main']['main_directory']
     
     main_connection = sqlite3.connect('{}/main.db'.format(main_dir))
+    main_cursor = main_connection.cursor()
 
     # Добавить recall в БД
+    user_id = get_user_id(user_name, main_cursor)
+    main_cursor.execute("SELECT * FROM recalls WHERE card_name = \""+ 
+                        str(card_name) +"\" AND user_id = " + 
+                        str(user_id) + " AND date_and_time = " +
+                        str(datetime.now().timestamp()))
+    if main_cursor.fetchall() == []:
+        main_cursor.execute("SELECT recall_id FROM recalls")
+        idmax = main_cursor.fetchall()
+        if idmax == []:
+            cur_id = 1
+        else:
+            cur_id = max(idmax)[0]+1
+        main_cursor.execute("INSERT INTO recalls (recall_id, user_id, card_name, date_and_time, result) VALUES ("+
+                            str(cur_id)+","+
+                            str(user_id) +",\""+
+                            str(card_name)+"\","+
+                            str(datetime.now().timestamp())+","+
+                            str(result)+")")
+        main_connection.commit()
+        main_connection.close()
+    else:
+        main_connection.close()
+        print("Recall already exists")
+        return "Recall already exists"
