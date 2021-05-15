@@ -64,6 +64,13 @@ def init(directory):
                   (user_id INTEGER NOT NULL PRIMARY KEY,
                    user_name TEXT NOT NULL)""")  
         main_connection.commit()
+	main_cursor.execute("""CREATE TABLE IF NOT EXISTS recalls
+                  (recall_id INTEGER NOT NULL PRIMARY KEY,
+                   user_id INTEGER NOT NULL,
+                   card_name TEXT NOT NULL,
+                   date_and_time INTEGER NOT NULL,
+                   result INTEGER NOT NULL)""")  
+	main_connection.commit()
         main_connection.close()
 
     # Запоминаем изменения в конфиге
