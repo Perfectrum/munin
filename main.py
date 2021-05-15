@@ -71,23 +71,21 @@ def init(directory):
         message = 'OK, directory {} is created and set'.format(directory)
 
     if status:
-        # База данных с карточками
+        # База данных
         main_connection = sqlite3.connect("main.db")
         main_cursor = main_connection.cursor()
+        # Таблица с карточками в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS cards
-        (user_id INT, card_id INT, card_name TEXT, question TEXT, answer TEXT)""")  
-        # cards_data = [(1, 1, 'eblan?', 'ty eblan?', 'da'), 
-        #               (2, 2, 'hui', 'how long your dick', '0'), 
-        #               (3, 3, 'semen', 'swallow my cum', 'yes')] 
-        # main_cursor.executemany("INSERT INTO cards VALUES (?,?,?,?,?)", cards_data)
+                  (user_id INTEGER NOT NULL,
+                   card_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+                   card_name TEXT NOT NULL, 
+                   question TEXT NOT NULL, 
+                   answer TEXT NOT NULL)""")  
         main_connection.commit()
-        # База данных с пользователями и id
+        # Таблица с пользователями и id в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS users
-        (user_id INT, user_name TEXT)""")  
-        # users_data = [(1, "XyeCoc"), 
-        #               (2, "Poopa"), 
-        #               (3, "Loopa")] 
-        # main_cursor.executemany("INSERT INTO users VALUES (?,?)", users_data)
+                  (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                   user_name TEXT NOT NULL)""")  
         main_connection.commit()
         main_connection.close()
         # pass # Создать БД тут
