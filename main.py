@@ -56,7 +56,7 @@ def init(directory):
                   (user_id INTEGER NOT NULL,
                    card_id INTEGER NOT NULL PRIMARY KEY, 
                    card_name TEXT NOT NULL, 
-                   question TEXT NOT NULL, 
+                   question_path TEXT NOT NULL, 
                    answer TEXT NOT NULL)""")  
         main_connection.commit()
          # Таблица с пользователями и id в БД
@@ -111,7 +111,7 @@ def add_user(username):
 ##############################################
 # Функция, добавляющая пользователю карточку #
 ##############################################
-def add_card(username, card_name, question_path, answer_path, additional_files_paths=[]):
+def add_card(username, card_name, question_path_path, answer_path, additional_files_paths=[]):
 
     config = configparser.ConfigParser()
     config.read('config.ini')
@@ -128,7 +128,7 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
 
         # Если какой-то из путей не валидный, отказ
         files_paths = additional_files_paths
-        files_paths.append(question_path)
+        files_paths.append(question_path_path)
         files_paths.append(answer_path)
 
     # Подключаемся к БД
@@ -173,12 +173,12 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
             	cur_id = 1
             else:
             	cur_id = max(idmax)[0]+1
-            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question, answer) VALUES ("+
+            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question_path, answer) VALUES ("+
                                 str(user_id)+","+
 				str(cur_id)+",\""+
 				str(card_name)+"\",\""+
-				str(question)+"\",\""+
-				str(answer)+"\")")
+				str(question_path)+"\",\""+
+				str(answer_path)+"\")")
             main_connection.commit()
         else:
             status = False
