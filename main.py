@@ -42,14 +42,14 @@ def init(directory):
         # Таблица с карточками в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS cards
                   (user_id INTEGER NOT NULL,
-                   card_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
+                   card_id INTEGER NOT NULL PRIMARY KEY, 
                    card_name TEXT NOT NULL, 
                    question TEXT NOT NULL, 
                    answer TEXT NOT NULL)""")  
         main_connection.commit()
          # Таблица с пользователями и id в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS users
-                  (user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                  (user_id INTEGER NOT NULL PRIMARY KEY,
                    user_name TEXT NOT NULL)""")  
         main_connection.commit()
         main_connection.close()
@@ -141,17 +141,18 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
 		                                        file_path, cur_right_path)
             # Добавляем карточку в БД
             main_cursor.execute("SELECT card_id FROM cards")
-            cards_data = [(user_id, card_name, question, answer)]        
-            main_cursor.execute(
-                "INSERT INTO cards (user_id, card_name, question_path, answer_path) VALUES ("+
-		        str(user_id ) +
-                ",\" " +
-                str(card_name) +
-                "\",\"" +
-                str(question_path) +
-                "\",\" " +
-                str(answer_path)+"\")")
-            main_connection.commit()
+            idmax = main_cursor.fetchall()
+            if idmax == []:
+            	cards_data = [(user_id, 1, card_name, question, answer)]        
+            else:
+            	cards_data = [(user_id, max(idmax)[0]+1, card_name, question, answer)]        
+            	main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question, answer) VALUES ("+
+                            str(user_id)+","
+		                    +str(max(idmax)[0]+1)+",\""
+				    +str(card_name)+"\",\""
+				    +str(question)+"\",\""
+				    +str(answer)+"\")")
+       	    	main_connection.commit()
         else:
             status = False
             message+= 'Card {} is already exists'.format(crad_name)	
