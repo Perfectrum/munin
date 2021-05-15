@@ -4,43 +4,23 @@ from glob import glob
 import configparser
 import sqlite3
 
+# Служебная функция для получение id пользователя по его имени (логину)
+def get_user_id(user_name, cursor):
+    #main_connection = sqlite3.connect("main.db")
+    #main_cursor = main_connection.cursor()
+    cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
+    ids = cursor.fetchall()
+    if ids == []:
+        out = "There is no user with this name"
+    else:
+        out = ids[0][0]
+    #main_connection.close()
+    return(out)
 
 ###############################################################
 # Функция, создающая файловую структуру в заданной директори, #
 #                        запускается при первом использовании #
 ###############################################################
-
-# Удаление пользователя из БД
-def delete_user(user_name):
-    main_connection = sqlite3.connect("main.db")
-    main_cursor = main_connection.cursor()
-    main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(user_name) +"\"")
-    if main_cursor.fetchall() == []:
-        print("There is no user with this name")
-        main_connection.close()
-        return "There is no user with this name"
-    else:
-        main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
-        delid = main_cursor.fetchall()[0][0]
-        main_cursor.execute("DELETE FROM users WHERE user_name = \""+ str(user_name) +"\"")
-        main_cursor.execute("UPDATE users SET user_id = user_id - 1 WHERE user_id > "+str(delid))
-        main_connection.commit()
-        main_connection.close()
-
-# Получение id по имени
-def get_user_id(user_name):
-    main_connection = sqlite3.connect("main.db")
-    main_cursor = main_connection.cursor()
-    main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
-    ids = main_cursor.fetchall()
-    if ids == []:
-        out = "There is no user with this name"
-    else:
-        out = ids[0][0]
-    main_connection.close()
-    return(out)
-
-
 def init(directory):
 
     config = configparser.ConfigParser()
@@ -96,7 +76,6 @@ def init(directory):
 ##########################################################
 # Функция, добавляющая пользователя в файловую структуру #
 ##########################################################
-# TODO: добавлять пользователя в БД
 def add_user(username):
 
     config = configparser.ConfigParser()
@@ -104,7 +83,7 @@ def add_user(username):
     main_dir = config['main']['main_directory']
 
     # добавить пользователя в БД тут
-    main_connection = sqlite3.connect("main.db")
+    main_connection = sqlite3.connect('{}/main.db'.format(main_dir))
     main_cursor = main_connection.cursor()
     main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(username) + "\"")
     if main_cursor.fetchall() == []:
@@ -157,9 +136,7 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
     main_cursor = main_connection.cursor()
 
     # Проверяем существование карточки в БД
-    ######################
-    # ОПРЕДЕЛИТЬ user_id #
-    ######################
+    user_id = get_user_id(username, main_cursor)
     main_cursor.execute("SELECT * FROM cards WHERE card_name =\""+
                         str(card_name) +"\" AND user_id = " + str(user_id))
     # Если карточки нет в БД, пробуем ее создать
@@ -229,10 +206,8 @@ def delete_card(username, card_name):
     main_cursor = main_connection.cursor()
 	
     # Если такой карточки нет, отказ
-    ######################
-    # ОПРЕДЕЛИТЬ user_id #
-    ######################
-    user_id = get_user_id(username)
+    
+    user_id = get_user_id(username, main_cursor)
 	
     main_cursor.execute("SELECT * FROM cards WHERE card_name = \""+ str(card_name) +"\" AND user_id = " + str(user_id))
     if main_cursor.fetchall() == []:
@@ -261,3 +236,21 @@ def delete_card(username, card_name):
         message = 'Card {} does not exist'.format(card_name)
     
     return status, message
+
+# Удаление пользователя из БД
+def delete_user(user_name):
+    main_connection = sqlite3.connect("main.db")
+    main_cursor = main_connection.cursor()
+    main_cursor.execute("SELECT * FROM users WHERE user_name = \""+ str(user_name) +"\"")
+    if main_cursor.fetchall() == []:
+        print("There is no user with this name")
+        main_connection.close()
+        return "There is no user with this name"
+    else:
+        main_cursor.execute("SELECT user_id FROM users WHERE user_name = \""+ str(user_name) +"\"")
+        delid = main_cursor.fetchall()[0][0]
+        main_cursor.execute("DELETE FROM users WHERE user_name = \""+ str(user_name) +"\"")
+        main_cursor.execute("UPDATE users SET user_id = user_id - 1 WHERE user_id > "+str(delid))
+        main_connection.commit()
+        main_connection.close()
+
