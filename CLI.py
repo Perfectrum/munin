@@ -1,7 +1,8 @@
 import os
 import argparse
+import subprocess
 
-from main import init, add_user, add_card, delete_card, 
+from main import * 
 
 parser = argparse.ArgumentParser()
 
@@ -55,20 +56,24 @@ if args.delete_card:
 
 # Повторение карточек
 if args.learn_cards:
-    for card_name in args.learn_cards.split(',')):
+    for card_name in args.learn_cards.split(','):
         question_path, answer_path = get_card(card_name)
         print('Вопрос карточки')        
-        os.startfile(question_path)
+        with open(question_path, 'r') as q:
+            print(q.read())
         input('Enter чтобы показать ответ')
-        os.startfile(answer_path)
+        with open(answer_path, 'r') as a:
+            print(a.read())
 
         result = None
         while result != 0 and result != 1:
-            feedback = input('Cчитать эту карточку изученной? [y/n]')
+            answer = input('Cчитать эту карточку изученной? [y/n]')
 
-            if an.lower() in ['y', 'yes', 'true']:
+            if answer.lower() in ['y', 'yes', 'true']:
                 result = 1
-            elif result.lower() in ['n', 'no', 'false']:
+            elif answer.lower() in ['n', 'no', 'false']:
                 result = 0
         
-        # Записать в БД событие recall
+        username = os.getlogin()
+
+        add_recall(username, card_name, result) 
