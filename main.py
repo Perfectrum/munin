@@ -3,6 +3,7 @@ import shutil
 from glob import glob
 import configparser
 import sqlite3
+from datetime import datetime
 
 # Служебная функция для получение id пользователя по его имени (логину)
 def get_user_id(user_name, cursor):
@@ -57,20 +58,19 @@ def init(directory):
                    card_id INTEGER NOT NULL PRIMARY KEY, 
                    card_name TEXT NOT NULL, 
                    question_path TEXT NOT NULL, 
-                   answer TEXT NOT NULL)""")  
+                   answer_path TEXT NOT NULL)""")  
         main_connection.commit()
          # Таблица с пользователями и id в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS users
                   (user_id INTEGER NOT NULL PRIMARY KEY,
                    user_name TEXT NOT NULL)""")  
-        main_connection.commit()
-	main_cursor.execute("""CREATE TABLE IF NOT EXISTS recalls
+        main_cursor.execute("""CREATE TABLE IF NOT EXISTS recalls
                   (recall_id INTEGER NOT NULL PRIMARY KEY,
                    user_id INTEGER NOT NULL,
                    card_name TEXT NOT NULL,
                    date_and_time INTEGER NOT NULL,
-                   result INTEGER NOT NULL)""")  
-	main_connection.commit()
+                   result INTEGER NOT NULL)""")
+        main_connection.commit()
         main_connection.close()
 
     # Запоминаем изменения в конфиге
@@ -180,7 +180,7 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
             	cur_id = 1
             else:
             	cur_id = max(idmax)[0]+1
-            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question_path, answer) VALUES ("+
+            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question_path, answer_path) VALUES ("+
                                 str(user_id)+","+
 				str(cur_id)+",\""+
 				str(card_name)+"\",\""+
@@ -298,7 +298,7 @@ def add_recall(username, card_name, result):
     main_cursor = main_connection.cursor()
 
     # Добавить recall в БД
-    user_id = get_user_id(user_name, main_cursor)
+    user_id = get_user_id(username, main_cursor)
     main_cursor.execute("SELECT * FROM recalls WHERE card_name = \""+ 
                         str(card_name) +"\" AND user_id = " + 
                         str(user_id) + " AND date_and_time = " +
@@ -322,3 +322,23 @@ def add_recall(username, card_name, result):
         main_connection.close()
         print("Recall already exists")
         return "Recall already exists"
+
+
+###################################################
+# Функция, возвращающая все карточки пользователя #
+# возвращает кортежи с id и названием карточки    #
+###################################################
+def get_user_cards(username):
+    
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    main_dir = config['main']['main_directory']
+    
+    main_connection = sqlite3.connect('{}/main.db'.format(main_dir))
+    main_cursor = main_connection.cursor()
+
+    user_id = get_user_id(username, main_cursor)
+    main_cursor.execute(
+        "SELECT card_id, card_name FROM cards WHERE user_id = {}".format(user_id))
+    
+    return main_cursor.fetchall()
