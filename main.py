@@ -16,7 +16,28 @@ def get_user_id(user_name, cursor):
     else:
         out = ids[0][0]
     #main_connection.close()
-    return(out)
+    return out
+
+# Функция изменения коэффициента в карточке
+def change_card_coef(user_id, card_name, coef):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    main_dir = config['main']['main_directory']
+    main_connection = sqlite3.connect('{}/main.db'.format(main_dir))
+    main_cursor = main_connection.cursor()
+    main_cursor.execute("""SELECT * FROM cards 
+                           WHERE card_name = \"{}\" 
+                           AND user_id = {}""".format(card_name, user_id))
+    if main_cursor.fetchall() == []:
+        main_connection.close()
+        return "There is no card with this name"
+    else:
+        main_cursor.execute("""UPDATE cards
+                               SET coef = {} 
+                               WHERE card_name = "{}"
+                               AND user_id = {}""".format(coef, card_name, user_id))
+        main_connection.commit()
+        main_connection.close()
 
 ###############################################################
 # Функция, создающая файловую структуру в заданной директори, #
