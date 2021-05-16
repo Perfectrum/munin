@@ -326,7 +326,6 @@ def add_recall(username, card_name, result):
 
 ###################################################
 # Функция, возвращающая все карточки пользователя #
-# возвращает кортежи с id и названием карточки    #
 ###################################################
 def get_user_cards(username):
     
@@ -339,6 +338,6 @@ def get_user_cards(username):
 
     user_id = get_user_id(username, main_cursor)
     main_cursor.execute(
-        "SELECT card_id, card_name FROM cards WHERE user_id = {}".format(user_id))
+        "SELECT * FROM cards WHERE user_id = {}".format(user_id))
     
     return main_cursor.fetchall()
