@@ -58,7 +58,8 @@ def init(directory):
                    card_id INTEGER NOT NULL PRIMARY KEY, 
                    card_name TEXT NOT NULL, 
                    question_path TEXT NOT NULL, 
-                   answer_path TEXT NOT NULL)""")  
+                   answer_path TEXT NOT NULL,
+		   coef INTEGER NOT NULL)""")  
         main_connection.commit()
          # Таблица с пользователями и id в БД
         main_cursor.execute("""CREATE TABLE IF NOT EXISTS users
@@ -180,12 +181,13 @@ def add_card(username, card_name, question_path, answer_path, additional_files_p
             	cur_id = 1
             else:
             	cur_id = max(idmax)[0]+1
-            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question_path, answer_path) VALUES ("+
+            main_cursor.execute("INSERT INTO cards (user_id, card_id, card_name, question_path, answer_path, coef) VALUES ("+
                                 str(user_id)+","+
 				str(cur_id)+",\""+
 				str(card_name)+"\",\""+
 				str(question_path)+"\",\""+
-				str(answer_path)+"\")")
+				str(answer_path)+"\","+
+                           	str(0)+")")
             main_connection.commit()
         else:
             status = False
